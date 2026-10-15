@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>StockBroker — הפקדה חודשית לקרן ההשתלמות</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --text: #1a1d23;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #2563eb;
+    --good: #16a34a;
+    --bad: #dc2626;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1115;
+      --card: #171a21;
+      --text: #e8eaed;
+      --muted: #9aa1ac;
+      --border: #2a2e37;
+      --accent: #5b8def;
+      --good: #4ade80;
+      --bad: #f87171;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+    padding: 16px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: 0.9rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .amount-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .amount-row label { font-weight: 600; }
+  .amount-row input {
+    font-size: 1.1rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    width: 160px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th, td { padding: 8px 6px; text-align: right; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: 0.8rem; }
+  .pos { color: var(--good); }
+  .neg { color: var(--bad); }
+  .na { color: var(--muted); }
+  .weight-bar-wrap {
+    background: var(--border);
+    border-radius: 6px;
+    height: 8px;
+    overflow: hidden;
+    min-width: 80px;
+  }
+  .weight-bar {
+    background: var(--accent);
+    height: 100%;
+  }
+  .fund-name { font-weight: 600; }
+  .fund-sub { color: var(--muted); font-size: 0.75rem; }
+  .nis { font-weight: 700; }
+  footer { color: var(--muted); font-size: 0.75rem; margin-top: 24px; line-height: 1.6; }
+  .updated { color: var(--muted); font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>לאן להפקיד החודש?</h1>
+  <p class="sub">דירוג 7 המדדים/קרנות שלך לפי תשואה מותאמת סיכון (12 חודשים אחרונים ÷ תנודתיות שנתית), והצעת חלוקה להפקדה החודשית.</p>
+
+  <div class="card">
+    <div class="amount-row">
+      <label for="amount">סכום להפקדה (₪):</label>
+      <input id="amount" type="number" value="1000" min="0" step="50" />
+      <span class="updated" id="updated"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <table id="fundsTable">
+      <thead>
+        <tr>
+          <th>קרן</th>
+          <th>1 חודש</th>
+          <th>3 חודשים</th>
+          <th>12 חודשים</th>
+          <th>תנודתיות (שנתי)</th>
+          <th>ציון מותאם סיכון</th>
+          <th>הקצאה מוצעת</th>
+          <th>סכום (₪)</th>
+        </tr>
+      </thead>
+      <tbody id="fundsBody"></tbody>
+    </table>
+  </div>
+
+  <footer>
+    <p><strong>לא ייעוץ השקעות.</strong> הנתונים נשלפים אוטומטית מ-bizportal.co.il וההמלצה מבוססת על נוסחה פשוטה (תשואת 12 חודשים חלקי תנודתיות שנתית), עם רצפת הקצאה של 3% לכל קרן כדי לשמור על פיזור. קרנות עם פחות משנת מסחר מלאה (מסומנות כ-N/A בטור 12 חודשים) מקבלות רצפת ברירת מחדל. בדוק תמיד נתונים מול המקור לפני קבלת החלטה.</p>
+  </footer>
+</div>
+
+<script>
+async function load() {
+  const res = await fetch('data/funds.json', { cache: 'no-store' });
+  const data = await res.json();
+
+  document.getElementById('updated').textContent =
+    'עודכן לאחרונה: ' + new Date(data.generated_at).toLocaleString('he-IL');
+
+  const tbody = document.getElementById('fundsBody');
+  const amountInput = document.getElementById('amount');
+
+  function pct(v) {
+    if (v === null || v === undefined) return '<span class="na">—</span>';
+    const cls = v >= 0 ? 'pos' : 'neg';
+    return `<span class="${cls}">${(v * 100).toFixed(1)}%</span>`;
+  }
+
+  function render() {
+    const amount = parseFloat(amountInput.value) || 0;
+    tbody.innerHTML = '';
+    for (const f of data.funds) {
+      const m = f.metrics;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div class="fund-name">${f.name_en}</div>
+          <div class="fund-sub">${f.name_he} · ${f.id}</div>
+        </td>
+        <td>${pct(m.return_1m)}</td>
+        <td>${pct(m.return_3m)}</td>
+        <td>${pct(m.return_12m)}</td>
+        <td>${m.volatility_12m !== null ? (m.volatility_12m * 100).toFixed(1) + '%' : '<span class="na">—</span>'}</td>
+        <td>${m.risk_adjusted_score !== null ? m.risk_adjusted_score.toFixed(2) : '<span class="na">—</span>'}</td>
+        <td>
+          <div class="weight-bar-wrap"><div class="weight-bar" style="width:${(f.suggested_weight * 100).toFixed(1)}%"></div></div>
+          ${(f.suggested_weight * 100).toFixed(1)}%
+        </td>
+        <td class="nis">₪${Math.round(f.suggested_weight * amount).toLocaleString('he-IL')}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  amountInput.addEventListener('input', render);
+  render();
+}
+
+load().catch(err => {
+  document.getElementById('fundsBody').innerHTML =
+    `<tr><td colspan="8">שגיאה בטעינת הנתונים: ${err.message}</td></tr>`;
+});
+</script>
+</body>
+</html>

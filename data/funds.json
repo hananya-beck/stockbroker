@@ -1,0 +1,117 @@
+{
+  "generated_at": "2026-10-15T14:12:58.071449Z",
+  "funds": [
+    {
+      "id": "5130604",
+      "name_he": "MTF מחקה אינדקס תשתיות לאומיות ישראל",
+      "name_en": "Infrastructure",
+      "metrics": {
+        "return_1m": -0.08368411132751141,
+        "return_3m": -0.07499603615030925,
+        "return_6m": -0.017381930876507523,
+        "return_12m": 0.5035307458378435,
+        "volatility_12m": 0.23751536095053166,
+        "risk_adjusted_score": 2.1199923399595026,
+        "last_price": 291.7,
+        "last_date": "14/10/2026"
+      },
+      "suggested_weight": 0.2387
+    },
+    {
+      "id": "1168723",
+      "name_he": "MTF סל אינדקס אנרגיה מתחדשת ישראל",
+      "name_en": "Renewable Energy",
+      "metrics": {
+        "return_1m": -0.09444444444444444,
+        "return_3m": -0.17714547957778792,
+        "return_6m": -0.05382585751978897,
+        "return_12m": 0.6617238183503245,
+        "volatility_12m": 0.32310987088690496,
+        "risk_adjusted_score": 2.04798391498829,
+        "last_price": 1793.0,
+        "last_date": "14/10/2026"
+      },
+      "suggested_weight": 0.2316
+    },
+    {
+      "id": "5109889",
+      "name_he": "MTF מחקה ת\"א 125",
+      "name_en": "TASE 125",
+      "metrics": {
+        "return_1m": -0.0392894190871369,
+        "return_3m": 0.004178996589035311,
+        "return_6m": -0.0207075824998898,
+        "return_12m": 0.3100135557258208,
+        "volatility_12m": 0.18423908954516144,
+        "risk_adjusted_score": 1.6826698204553872,
+        "last_price": 444.54,
+        "last_date": "14/10/2026"
+      },
+      "suggested_weight": 0.1957
+    },
+    {
+      "id": "5131081",
+      "name_he": "הראל מחקה ת\"א טכנולוגיה",
+      "name_en": "Technology TA",
+      "metrics": {
+        "return_1m": -0.04992072674294046,
+        "return_3m": -0.10096504744140788,
+        "return_6m": -0.13153153153153152,
+        "return_12m": 0.2770418154590484,
+        "volatility_12m": 0.2496549729311634,
+        "risk_adjusted_score": 1.1096987662866875,
+        "last_price": 221.72,
+        "last_date": "14/10/2026"
+      },
+      "suggested_weight": 0.1393
+    },
+    {
+      "id": "1159243",
+      "name_he": "ISHARES NASDAQ 100 UCITS ETF",
+      "name_en": "Nasdaq 100 (unhedged, Barclays)",
+      "metrics": {
+        "return_1m": 0.05324980422866088,
+        "return_3m": 0.04750778816199386,
+        "return_6m": 0.24537037037037046,
+        "return_12m": 0.14932706686605424,
+        "volatility_12m": 0.14036588454855106,
+        "risk_adjusted_score": 1.0638415975956295,
+        "last_price": 538000.0,
+        "last_date": "14/10/2026"
+      },
+      "suggested_weight": 0.1347
+    },
+    {
+      "id": "5141775",
+      "name_he": "הראל מחקה ת\"א בטחוניות",
+      "name_en": "Israel Defense Forces (TA Defense index)",
+      "metrics": {
+        "return_1m": -0.07241532976827092,
+        "return_3m": -0.176621835443038,
+        "return_6m": -0.331137532133676,
+        "return_12m": null,
+        "volatility_12m": 0.34490030981956044,
+        "risk_adjusted_score": null,
+        "last_price": 83.26,
+        "last_date": "14/10/2026"
+      },
+      "suggested_weight": 0.03
+    },
+    {
+      "id": "5141312",
+      "name_he": "קסם KTF אינדקס בנקים ישראל",
+      "name_en": "Banks",
+      "metrics": {
+        "return_1m": -0.05363636363636359,
+        "return_3m": 0.09036374023995442,
+        "return_6m": 0.034697750067768984,
+        "return_12m": null,
+        "volatility_12m": 0.24907859009830866,
+        "risk_adjusted_score": null,
+        "last_price": 114.51,
+        "last_date": "14/10/2026"
+      },
+      "suggested_weight": 0.03
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "funds": [
+    {
+      "id": "5141775",
+      "name_he": "הראל מחקה ת\"א בטחוניות",
+      "name_en": "Israel Defense Forces (TA Defense index)"
+    },
+    {
+      "id": "5109889",
+      "name_he": "MTF מחקה ת\"א 125",
+      "name_en": "TASE 125"
+    },
+    {
+      "id": "1168723",
+      "name_he": "MTF סל אינדקס אנרגיה מתחדשת ישראל",
+      "name_en": "Renewable Energy"
+    },
+    {
+      "id": "1159243",
+      "name_he": "ISHARES NASDAQ 100 UCITS ETF",
+      "name_en": "Nasdaq 100 (unhedged, Barclays)"
+    },
+    {
+      "id": "5131081",
+      "name_he": "הראל מחקה ת\"א טכנולוגיה",
+      "name_en": "Technology TA"
+    },
+    {
+      "id": "5141312",
+      "name_he": "קסם KTF אינדקס בנקים ישראל",
+      "name_en": "Banks"
+    },
+    {
+      "id": "5130604",
+      "name_he": "MTF מחקה אינדקס תשתיות לאומיות ישראל",
+      "name_en": "Infrastructure"
+    }
+  ]
+}
