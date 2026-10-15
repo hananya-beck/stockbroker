@@ -1,0 +1,58 @@
+/* Single source of truth for styling values. Every other stylesheet/style
+   block should only consume these via var(--token-name), never hardcode a
+   color, size, or spacing value directly. */
+:root {
+  /* Colors */
+  --bg: #f7f8fa;
+  --card: #ffffff;
+  --text: #1a1d23;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #2563eb;
+  --good: #16a34a;
+  --bad: #dc2626;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 10px;
+  --space-5: 12px;
+  --space-6: 16px;
+  --space-7: 20px;
+  --space-8: 24px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Typography */
+  --font-family-base: "Segoe UI", Arial, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.8rem;
+  --font-size-base: 0.9rem;
+  --font-size-md: 1.1rem;
+  --font-size-lg: 1.4rem;
+  --line-height-relaxed: 1.6;
+
+  /* Layout */
+  --max-width: 920px;
+  --input-width: 160px;
+  --weight-bar-height: 8px;
+  --weight-bar-min-width: 80px;
+  --border-width: 1px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115;
+    --card: #171a21;
+    --text: #e8eaed;
+    --muted: #9aa1ac;
+    --border: #2a2e37;
+    --accent: #5b8def;
+    --good: #4ade80;
+    --bad: #f87171;
+  }
+}

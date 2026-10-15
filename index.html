@@ -4,85 +4,64 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>StockBroker — יועץ השקעות</title>
+<link rel="stylesheet" href="src/styles/tokens.css" />
 <style>
-  :root {
-    --bg: #f7f8fa;
-    --card: #ffffff;
-    --text: #1a1d23;
-    --muted: #6b7280;
-    --border: #e5e7eb;
-    --accent: #2563eb;
-    --good: #16a34a;
-    --bad: #dc2626;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0f1115;
-      --card: #171a21;
-      --text: #e8eaed;
-      --muted: #9aa1ac;
-      --border: #2a2e37;
-      --accent: #5b8def;
-      --good: #4ade80;
-      --bad: #f87171;
-    }
-  }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: "Segoe UI", Arial, sans-serif;
-    padding: 16px;
+    font-family: var(--font-family-base);
+    padding: var(--space-6);
   }
-  .wrap { max-width: 920px; margin: 0 auto; }
-  h1 { font-size: 1.4rem; margin: 0 0 4px; }
-  .sub { color: var(--muted); margin: 0 0 20px; font-size: 0.9rem; }
+  .wrap { max-width: var(--max-width); margin: 0 auto; }
+  h1 { font-size: var(--font-size-lg); margin: 0 0 var(--space-1); }
+  .sub { color: var(--muted); margin: 0 0 var(--space-7); font-size: var(--font-size-base); }
   .card {
     background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
   }
   .amount-row {
     display: flex;
-    gap: 10px;
+    gap: var(--space-4);
     align-items: center;
     flex-wrap: wrap;
   }
   .amount-row label { font-weight: 600; }
   .amount-row input {
-    font-size: 1.1rem;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
+    font-size: var(--font-size-md);
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-md);
+    border: var(--border-width) solid var(--border);
     background: var(--bg);
     color: var(--text);
-    width: 160px;
+    width: var(--input-width);
   }
-  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-  th, td { padding: 8px 6px; text-align: right; border-bottom: 1px solid var(--border); }
-  th { color: var(--muted); font-weight: 600; font-size: 0.8rem; }
+  table { width: 100%; border-collapse: collapse; font-size: var(--font-size-base); }
+  th, td { padding: var(--space-3) var(--space-2); text-align: right; border-bottom: var(--border-width) solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: var(--font-size-sm); }
   .pos { color: var(--good); }
   .neg { color: var(--bad); }
   .na { color: var(--muted); }
   .weight-bar-wrap {
     background: var(--border);
-    border-radius: 6px;
-    height: 8px;
+    border-radius: var(--radius-sm);
+    height: var(--weight-bar-height);
     overflow: hidden;
-    min-width: 80px;
+    min-width: var(--weight-bar-min-width);
   }
   .weight-bar {
     background: var(--accent);
     height: 100%;
   }
   .fund-name { font-weight: 600; }
-  .fund-sub { color: var(--muted); font-size: 0.75rem; }
+  .fund-sub { color: var(--muted); font-size: var(--font-size-xs); }
   .nis { font-weight: 700; }
-  footer { color: var(--muted); font-size: 0.75rem; margin-top: 24px; line-height: 1.6; }
-  .updated { color: var(--muted); font-size: 0.8rem; }
+  footer { color: var(--muted); font-size: var(--font-size-xs); margin-top: var(--space-8); line-height: var(--line-height-relaxed); }
+  .updated { color: var(--muted); font-size: var(--font-size-sm); }
 </style>
 </head>
 <body>
@@ -127,7 +106,16 @@
   </footer>
 </div>
 
-<script>
+<script type="module">
+import { buildFundRowViewModel } from './src/lib/formatting.js';
+
+/** @param {import('./src/lib/formatting.js').FormattedValue} v */
+function cell(v) {
+  if (v.sign) return `<span class="${v.sign}">${v.text}</span>`;
+  if (v.text === '—') return `<span class="na">${v.text}</span>`;
+  return v.text;
+}
+
 async function load() {
   const res = await fetch('data/funds.json', { cache: 'no-store' });
   const data = await res.json();
@@ -138,45 +126,33 @@ async function load() {
   const tbody = document.getElementById('fundsBody');
   const amountInput = document.getElementById('amount');
 
-  function pct(v) {
-    if (v === null || v === undefined) return '<span class="na">—</span>';
-    const cls = v >= 0 ? 'pos' : 'neg';
-    return `<span class="${cls}">${(v * 100).toFixed(1)}%</span>`;
-  }
-
-  function volPct(v) {
-    return v !== null && v !== undefined
-      ? (v * 100).toFixed(1) + '%'
-      : '<span class="na">—</span>';
-  }
-
   function render() {
     const amount = parseFloat(amountInput.value) || 0;
     tbody.innerHTML = '';
     for (const f of data.funds) {
-      const m = f.metrics;
+      const row = buildFundRowViewModel(f, amount);
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <div class="fund-name">${f.name_en}</div>
-          <div class="fund-sub">${f.name_he}</div>
+          <div class="fund-name">${row.nameEn}</div>
+          <div class="fund-sub">${row.nameHe}</div>
         </td>
-        <td>${f.id}</td>
-        <td>${pct(m.return_1m)}</td>
-        <td>${pct(m.return_3m)}</td>
-        <td>${pct(m.return_1y)}</td>
-        <td>${pct(m.return_3y)}</td>
-        <td>${pct(m.return_5y)}</td>
-        <td>${volPct(m.volatility_1y)}</td>
-        <td>${volPct(m.volatility_3y)}</td>
-        <td>${volPct(m.volatility_5y)}</td>
-        <td>${volPct(m.volatility_blended)}</td>
-        <td>${m.risk_adjusted_score !== null ? m.risk_adjusted_score.toFixed(2) : '<span class="na">—</span>'}</td>
+        <td>${row.id}</td>
+        <td>${cell(row.return1m)}</td>
+        <td>${cell(row.return3m)}</td>
+        <td>${cell(row.return1y)}</td>
+        <td>${cell(row.return3y)}</td>
+        <td>${cell(row.return5y)}</td>
+        <td>${cell(row.volatility1y)}</td>
+        <td>${cell(row.volatility3y)}</td>
+        <td>${cell(row.volatility5y)}</td>
+        <td>${cell(row.volatilityBlended)}</td>
+        <td>${cell(row.riskAdjustedScore)}</td>
         <td>
-          <div class="weight-bar-wrap"><div class="weight-bar" style="width:${(f.suggested_weight * 100).toFixed(1)}%"></div></div>
-          ${(f.suggested_weight * 100).toFixed(1)}%
+          <div class="weight-bar-wrap"><div class="weight-bar" style="width:${row.weightPct}%"></div></div>
+          ${row.weightPct}%
         </td>
-        <td class="nis">₪${Math.round(f.suggested_weight * amount).toLocaleString('he-IL')}</td>
+        <td class="nis">₪${row.amount.toLocaleString('he-IL')}</td>
       `;
       tbody.appendChild(tr);
     }
