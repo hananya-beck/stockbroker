@@ -7,6 +7,7 @@ import {
   computeAllocationAmount,
   formatWeightPercent,
   buildFundRowViewModel,
+  formatRelativeTime,
 } from '../../src/lib/formatting.js';
 
 test('formatPercent formats a positive fraction with a pos sign', () => {
@@ -72,4 +73,25 @@ test('buildFundRowViewModel assembles a full row from a fund + amount', () => {
   assert.deepEqual(row.volatilityBlended, { text: '17.5%', sign: null });
   assert.equal(row.weightPct, '20.0');
   assert.equal(row.amount, 200);
+});
+
+const NOW = new Date('2026-10-16T12:00:00Z');
+const ago = (/** @type {number} */ s) => new Date(NOW.getTime() - s * 1000).toISOString();
+
+test('formatRelativeTime says "just now" under a minute', () => {
+  assert.equal(formatRelativeTime(ago(30), NOW), 'ממש עכשיו');
+});
+
+test('formatRelativeTime picks minutes, hours and days', () => {
+  assert.equal(formatRelativeTime(ago(5 * 60), NOW), 'לפני 5 דקות');
+  assert.equal(formatRelativeTime(ago(3 * 3600), NOW), 'לפני 3 שעות');
+  assert.equal(formatRelativeTime(ago(4 * 86400), NOW), 'לפני 4 ימים');
+});
+
+test('formatRelativeTime uses "yesterday" for one day', () => {
+  assert.equal(formatRelativeTime(ago(86400), NOW), 'אתמול');
+});
+
+test('formatRelativeTime returns "" for an unparseable date', () => {
+  assert.equal(formatRelativeTime('not a date', NOW), '');
 });

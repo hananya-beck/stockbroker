@@ -140,3 +140,36 @@ export function buildFundRowViewModel(fund, amount) {
     amount: computeAllocationAmount(fund.suggested_weight, amount),
   };
 }
+
+const RELATIVE_UNITS = /** @type {const} */ ([
+  ['year', 365 * 24 * 60 * 60],
+  ['month', 30 * 24 * 60 * 60],
+  ['day', 24 * 60 * 60],
+  ['hour', 60 * 60],
+  ['minute', 60],
+]);
+
+/**
+ * Hebrew relative time for a past timestamp, e.g. "לפני 3 ימים".
+ * `now` is passed in so the function stays pure and testable.
+ * @param {string} isoDate - ISO 8601 timestamp, e.g. data.generated_at.
+ * @param {Date} now
+ * @returns {string} Relative text, or "" when isoDate is unparseable.
+ */
+export function formatRelativeTime(isoDate, now) {
+  const then = new Date(isoDate).getTime();
+  if (Number.isNaN(then)) {
+    return '';
+  }
+  const seconds = Math.round((now.getTime() - then) / 1000);
+  if (seconds < 60) {
+    return 'ממש עכשיו';
+  }
+  const rtf = new Intl.RelativeTimeFormat('he', { numeric: 'auto' });
+  for (const [unit, size] of RELATIVE_UNITS) {
+    if (seconds >= size) {
+      return rtf.format(-Math.floor(seconds / size), unit);
+    }
+  }
+  return 'ממש עכשיו';
+}

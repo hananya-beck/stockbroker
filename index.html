@@ -107,7 +107,7 @@
 </div>
 
 <script type="module">
-import { buildFundRowViewModel } from './src/lib/formatting.js';
+import { buildFundRowViewModel, formatRelativeTime } from './src/lib/formatting.js';
 
 /** @param {import('./src/lib/formatting.js').FormattedValue} v */
 function cell(v) {
@@ -121,7 +121,8 @@ async function load() {
   const data = await res.json();
 
   document.getElementById('updated').textContent =
-    'עודכן לאחרונה: ' + new Date(data.generated_at).toLocaleString('he-IL');
+    'עודכן לאחרונה: ' + new Date(data.generated_at).toLocaleString('he-IL') +
+    ' (' + formatRelativeTime(data.generated_at, new Date()) + ')';
 
   const tbody = document.getElementById('fundsBody');
   const amountInput = document.getElementById('amount');
