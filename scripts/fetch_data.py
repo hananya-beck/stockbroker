@@ -120,11 +120,14 @@ def compute_metrics(series):
         metrics[f"return_{label}"] = trailing_return(series, days)
 
     horizon_scores = {}
+    horizon_vols = {}
     for label, days in LONG_HORIZONS.items():
         ret = annualized_return(series, days)
         vol = annualized_volatility(series, days)
         metrics[f"return_{label}"] = ret
         metrics[f"volatility_{label}"] = vol
+        if vol is not None:
+            horizon_vols[label] = vol
         if ret is not None and vol:
             horizon_scores[label] = ret / vol
 
@@ -135,6 +138,16 @@ def compute_metrics(series):
         ) / weight_sum
     else:
         metrics["risk_adjusted_score"] = None
+
+    # Blended volatility: same 1y/3y/5y weights as the score, averaged over
+    # whichever horizons the fund has a full window for.
+    if horizon_vols:
+        weight_sum = sum(LONG_HORIZON_WEIGHTS[l] for l in horizon_vols)
+        metrics["volatility_blended"] = sum(
+            horizon_vols[l] * LONG_HORIZON_WEIGHTS[l] for l in horizon_vols
+        ) / weight_sum
+    else:
+        metrics["volatility_blended"] = None
 
     metrics["history_days"] = len(series)
     metrics["last_price"] = series[-1]["close"]

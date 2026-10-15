@@ -109,6 +109,9 @@
           <th>3 שנים</th>
           <th>5 שנים</th>
           <th>תנודתיות (1 שנה)</th>
+          <th>תנודתיות (3 שנים)</th>
+          <th>תנודתיות (5 שנים)</th>
+          <th>תנודתיות משוקללת (1/3/5)</th>
           <th>ציון מותאם סיכון</th>
           <th>הקצאה מוצעת</th>
           <th>סכום (₪)</th>
@@ -140,6 +143,12 @@ async function load() {
     return `<span class="${cls}">${(v * 100).toFixed(1)}%</span>`;
   }
 
+  function volPct(v) {
+    return v !== null && v !== undefined
+      ? (v * 100).toFixed(1) + '%'
+      : '<span class="na">—</span>';
+  }
+
   function render() {
     const amount = parseFloat(amountInput.value) || 0;
     tbody.innerHTML = '';
@@ -156,7 +165,10 @@ async function load() {
         <td>${pct(m.return_1y)}</td>
         <td>${pct(m.return_3y)}</td>
         <td>${pct(m.return_5y)}</td>
-        <td>${m.volatility_1y !== null ? (m.volatility_1y * 100).toFixed(1) + '%' : '<span class="na">—</span>'}</td>
+        <td>${volPct(m.volatility_1y)}</td>
+        <td>${volPct(m.volatility_3y)}</td>
+        <td>${volPct(m.volatility_5y)}</td>
+        <td>${volPct(m.volatility_blended)}</td>
         <td>${m.risk_adjusted_score !== null ? m.risk_adjusted_score.toFixed(2) : '<span class="na">—</span>'}</td>
         <td>
           <div class="weight-bar-wrap"><div class="weight-bar" style="width:${(f.suggested_weight * 100).toFixed(1)}%"></div></div>
@@ -174,7 +186,7 @@ async function load() {
 
 load().catch(err => {
   document.getElementById('fundsBody').innerHTML =
-    `<tr><td colspan="10">שגיאה בטעינת הנתונים: ${err.message}</td></tr>`;
+    `<tr><td colspan="13">שגיאה בטעינת הנתונים: ${err.message}</td></tr>`;
 });
 </script>
 </body>
