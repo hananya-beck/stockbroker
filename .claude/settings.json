@@ -1,0 +1,14 @@
+{
+  "effortLevel": "high",
+  "permissions": {
+    "allow": [
+      "Bash(npm run check)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run lint)",
+      "Bash(npm test)",
+      "Bash(python -m pytest *)",
+      "Bash(python -m ruff check *)",
+      "Bash(python -m mypy *)"
+    ]
+  }
+}
