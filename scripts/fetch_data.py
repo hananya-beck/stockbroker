@@ -4,12 +4,13 @@ and compute trailing returns, volatility and a suggested monthly allocation.
 
 Writes the result to data/funds.json, which the static site (index.html) reads.
 """
+import itertools
 import json
 import math
 import statistics
 import time
 import urllib.request
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from http.cookiejar import CookieJar
 from pathlib import Path
 
@@ -106,7 +107,7 @@ def annualized_volatility(series, days):
     window = series[-days - 1 :]
     daily_returns = [
         math.log(cur["close"] / prev["close"])
-        for prev, cur in zip(window, window[1:])
+        for prev, cur in itertools.pairwise(window)
         if prev["close"] > 0
     ]
     if len(daily_returns) < 2:
@@ -199,7 +200,7 @@ def main():
     allocate_weights(funds)
 
     output = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "funds": funds,
     }
     OUTPUT.write_text(
