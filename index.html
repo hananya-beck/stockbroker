@@ -103,6 +103,7 @@
       <thead>
         <tr>
           <th>קרן</th>
+          <th>מספר קרן</th>
           <th>1 חודש</th>
           <th>3 חודשים</th>
           <th>תשואה שנתית: 1 שנה</th>
@@ -158,8 +159,9 @@ async function load() {
       tr.innerHTML = `
         <td>
           <div class="fund-name">${f.name_en}</div>
-          <div class="fund-sub">${f.name_he} · ${f.id}</div>
+          <div class="fund-sub">${f.name_he}</div>
         </td>
+        <td>${f.id}</td>
         <td>${pct(m.return_1m)}</td>
         <td>${pct(m.return_3m)}</td>
         <td>${pct(m.return_1y)}</td>
@@ -186,7 +188,7 @@ async function load() {
 
 load().catch(err => {
   document.getElementById('fundsBody').innerHTML =
-    `<tr><td colspan="13">שגיאה בטעינת הנתונים: ${err.message}</td></tr>`;
+    `<tr><td colspan="14">שגיאה בטעינת הנתונים: ${err.message}</td></tr>`;
 });
 </script>
 </body>
