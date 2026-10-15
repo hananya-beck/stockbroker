@@ -173,3 +173,36 @@ export function formatRelativeTime(isoDate, now) {
   }
   return 'ממש עכשיו';
 }
+
+/**
+ * @typedef {Object} AllocationSummary
+ * @property {number} fundCount
+ * @property {number} totalAmount - Sum of the rounded per-fund amounts, so
+ *   rounding drift against the typed deposit stays visible.
+ * @property {FormattedValue} weightedScore - Weight-averaged risk-adjusted
+ *   score over funds that have one, or "—" when none do.
+ */
+
+/**
+ * @param {Fund[]} funds
+ * @param {number} amount - Total deposit amount.
+ * @returns {AllocationSummary}
+ */
+export function summarizeAllocation(funds, amount) {
+  let totalAmount = 0;
+  let scoreSum = 0;
+  let weightSum = 0;
+  for (const fund of funds) {
+    totalAmount += computeAllocationAmount(fund.suggested_weight, amount);
+    const score = fund.metrics.risk_adjusted_score;
+    if (score !== null && score !== undefined) {
+      scoreSum += fund.suggested_weight * score;
+      weightSum += fund.suggested_weight;
+    }
+  }
+  return {
+    fundCount: funds.length,
+    totalAmount,
+    weightedScore: formatScore(weightSum > 0 ? scoreSum / weightSum : null),
+  };
+}

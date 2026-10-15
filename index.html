@@ -61,6 +61,7 @@
   .fund-sub { color: var(--muted); font-size: var(--font-size-xs); }
   .nis { font-weight: 700; }
   footer { color: var(--muted); font-size: var(--font-size-xs); margin-top: var(--space-8); line-height: var(--line-height-relaxed); }
+  .summary td { font-weight: 700; border-top: 2px solid var(--border); padding-top: var(--space-4); }
   .updated { color: var(--muted); font-size: var(--font-size-sm); }
 </style>
 </head>
@@ -98,6 +99,9 @@
         </tr>
       </thead>
       <tbody id="fundsBody"></tbody>
+      <tfoot>
+        <tr class="summary"><td colspan="14" id="fundsSummary"></td></tr>
+      </tfoot>
     </table>
   </div>
 
@@ -107,7 +111,7 @@
 </div>
 
 <script type="module">
-import { buildFundRowViewModel, formatRelativeTime } from './src/lib/formatting.js';
+import { buildFundRowViewModel, formatRelativeTime, summarizeAllocation } from './src/lib/formatting.js';
 
 /** @param {import('./src/lib/formatting.js').FormattedValue} v */
 function cell(v) {
@@ -157,6 +161,9 @@ async function load() {
       `;
       tbody.appendChild(tr);
     }
+    const s = summarizeAllocation(data.funds, amount);
+    document.getElementById('fundsSummary').textContent =
+      `סה״כ: ₪${s.totalAmount.toLocaleString('he-IL')} · ${s.fundCount} קרנות · ציון משוקלל: ${s.weightedScore.text}`;
   }
 
   amountInput.addEventListener('input', render);

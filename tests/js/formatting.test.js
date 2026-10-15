@@ -8,6 +8,7 @@ import {
   formatWeightPercent,
   buildFundRowViewModel,
   formatRelativeTime,
+  summarizeAllocation,
 } from '../../src/lib/formatting.js';
 
 test('formatPercent formats a positive fraction with a pos sign', () => {
@@ -94,4 +95,47 @@ test('formatRelativeTime uses "yesterday" for one day', () => {
 
 test('formatRelativeTime returns "" for an unparseable date', () => {
   assert.equal(formatRelativeTime('not a date', NOW), '');
+});
+
+/**
+ * @param {number} weight
+ * @param {number | null} score
+ * @returns {import('../../src/lib/formatting.js').Fund}
+ */
+const fundWith = (weight, score) => ({
+  id: 'x',
+  name_en: 'x',
+  name_he: 'x',
+  suggested_weight: weight,
+  metrics: {
+    return_1m: null, return_3m: null, return_1y: null, return_3y: null, return_5y: null,
+    volatility_1y: null, volatility_3y: null, volatility_5y: null, volatility_blended: null,
+    risk_adjusted_score: score,
+  },
+});
+
+test('summarizeAllocation weights the score by allocation', () => {
+  assert.deepEqual(summarizeAllocation([fundWith(0.5, 2), fundWith(0.5, 1)], 1000), {
+    fundCount: 2,
+    totalAmount: 1000,
+    weightedScore: { text: '1.50', sign: null },
+  });
+});
+
+test('summarizeAllocation sums rounded amounts so drift is visible', () => {
+  const third = 1 / 3;
+  const funds = [fundWith(third, 1), fundWith(third, 1), fundWith(third, 1)];
+  assert.equal(summarizeAllocation(funds, 100).totalAmount, 99);
+});
+
+test('summarizeAllocation skips funds with no score', () => {
+  assert.deepEqual(summarizeAllocation([fundWith(0.97, 1.2), fundWith(0.03, null)], 0), {
+    fundCount: 2,
+    totalAmount: 0,
+    weightedScore: { text: '1.20', sign: null },
+  });
+});
+
+test('summarizeAllocation shows "—" when no fund has a score', () => {
+  assert.equal(summarizeAllocation([fundWith(1, null)], 100).weightedScore.text, '—');
 });
