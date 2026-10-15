@@ -1,5 +1,6 @@
 {
   "effortLevel": "high",
+  "model": "haiku",
   "permissions": {
     "allow": [
       "Bash(npm run check)",
