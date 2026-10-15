@@ -250,8 +250,12 @@ async function gh(path, init = {}) {
     },
   });
   if (!res.ok) {
-    if (res.status === 401) token = null; // ask again next click
-    throw new Error(describeApiError(res.status));
+    const message = describeApiError(res.status);
+    if (res.status === 401) {
+      token = null; // ask again next click
+      alert(message);
+    }
+    throw new Error(message);
   }
   return res;
 }
