@@ -1,6 +1,27 @@
 {
-  "generated_at": "2026-10-15T14:12:58.071449Z",
+  "generated_at": "2026-10-15T14:21:04.326150+00:00",
   "funds": [
+    {
+      "id": "5109889",
+      "name_he": "MTF מחקה ת\"א 125",
+      "name_en": "TASE 125",
+      "metrics": {
+        "return_1m": -0.0392894190871369,
+        "return_3m": 0.004178996589035311,
+        "return_6m": -0.0207075824998898,
+        "return_1y": 0.3100135557258208,
+        "volatility_1y": 0.18423908954516144,
+        "return_3y": 0.2907519295563179,
+        "volatility_3y": 0.173439875122558,
+        "return_5y": null,
+        "volatility_5y": null,
+        "risk_adjusted_score": 1.6790034212558862,
+        "history_days": 1229,
+        "last_price": 444.54,
+        "last_date": "14/10/2026"
+      },
+      "suggested_weight": 0.2177
+    },
     {
       "id": "5130604",
       "name_he": "MTF מחקה אינדקס תשתיות לאומיות ישראל",
@@ -9,13 +30,18 @@
         "return_1m": -0.08368411132751141,
         "return_3m": -0.07499603615030925,
         "return_6m": -0.017381930876507523,
-        "return_12m": 0.5035307458378435,
-        "volatility_12m": 0.23751536095053166,
-        "risk_adjusted_score": 2.1199923399595026,
+        "return_1y": 0.5035307458378435,
+        "volatility_1y": 0.23751536095053166,
+        "return_3y": 0.29223449219684805,
+        "volatility_3y": 0.21992010323966096,
+        "return_5y": null,
+        "volatility_5y": null,
+        "risk_adjusted_score": 1.6584758329119929,
+        "history_days": 1229,
         "last_price": 291.7,
         "last_date": "14/10/2026"
       },
-      "suggested_weight": 0.2387
+      "suggested_weight": 0.2152
     },
     {
       "id": "1168723",
@@ -25,26 +51,15 @@
         "return_1m": -0.09444444444444444,
         "return_3m": -0.17714547957778792,
         "return_6m": -0.05382585751978897,
-        "return_12m": 0.6617238183503245,
-        "volatility_12m": 0.32310987088690496,
-        "risk_adjusted_score": 2.04798391498829,
+        "return_1y": 0.6617238183503245,
+        "volatility_1y": 0.32310987088690496,
+        "return_3y": 0.2756722940667897,
+        "volatility_3y": 0.2550189697227461,
+        "return_5y": null,
+        "volatility_5y": null,
+        "risk_adjusted_score": 1.4839026169471137,
+        "history_days": 1229,
         "last_price": 1793.0,
-        "last_date": "14/10/2026"
-      },
-      "suggested_weight": 0.2316
-    },
-    {
-      "id": "5109889",
-      "name_he": "MTF מחקה ת\"א 125",
-      "name_en": "TASE 125",
-      "metrics": {
-        "return_1m": -0.0392894190871369,
-        "return_3m": 0.004178996589035311,
-        "return_6m": -0.0207075824998898,
-        "return_12m": 0.3100135557258208,
-        "volatility_12m": 0.18423908954516144,
-        "risk_adjusted_score": 1.6826698204553872,
-        "last_price": 444.54,
         "last_date": "14/10/2026"
       },
       "suggested_weight": 0.1957
@@ -57,13 +72,18 @@
         "return_1m": -0.04992072674294046,
         "return_3m": -0.10096504744140788,
         "return_6m": -0.13153153153153152,
-        "return_12m": 0.2770418154590484,
-        "volatility_12m": 0.2496549729311634,
-        "risk_adjusted_score": 1.1096987662866875,
+        "return_1y": 0.2770418154590484,
+        "volatility_1y": 0.2496549729311634,
+        "return_3y": 0.24653476648203898,
+        "volatility_3y": 0.20104486709749872,
+        "return_5y": null,
+        "volatility_5y": null,
+        "risk_adjusted_score": 1.177697136019648,
+        "history_days": 1229,
         "last_price": 221.72,
         "last_date": "14/10/2026"
       },
-      "suggested_weight": 0.1393
+      "suggested_weight": 0.1615
     },
     {
       "id": "1159243",
@@ -73,13 +93,18 @@
         "return_1m": 0.05324980422866088,
         "return_3m": 0.04750778816199386,
         "return_6m": 0.24537037037037046,
-        "return_12m": 0.14932706686605424,
-        "volatility_12m": 0.14036588454855106,
-        "risk_adjusted_score": 1.0638415975956295,
+        "return_1y": 0.14932706686605424,
+        "volatility_1y": 0.14036588454855106,
+        "return_3y": 0.17339981133781923,
+        "volatility_3y": 0.16039135356997442,
+        "return_5y": null,
+        "volatility_5y": null,
+        "risk_adjusted_score": 1.073911613931968,
+        "history_days": 1229,
         "last_price": 538000.0,
         "last_date": "14/10/2026"
       },
-      "suggested_weight": 0.1347
+      "suggested_weight": 0.1499
     },
     {
       "id": "5141775",
@@ -89,9 +114,14 @@
         "return_1m": -0.07241532976827092,
         "return_3m": -0.176621835443038,
         "return_6m": -0.331137532133676,
-        "return_12m": null,
-        "volatility_12m": 0.34490030981956044,
+        "return_1y": null,
+        "volatility_1y": null,
+        "return_3y": null,
+        "volatility_3y": null,
+        "return_5y": null,
+        "volatility_5y": null,
         "risk_adjusted_score": null,
+        "history_days": 194,
         "last_price": 83.26,
         "last_date": "14/10/2026"
       },
@@ -105,9 +135,14 @@
         "return_1m": -0.05363636363636359,
         "return_3m": 0.09036374023995442,
         "return_6m": 0.034697750067768984,
-        "return_12m": null,
-        "volatility_12m": 0.24907859009830866,
+        "return_1y": null,
+        "volatility_1y": null,
+        "return_3y": null,
+        "volatility_3y": null,
+        "return_5y": null,
+        "volatility_5y": null,
         "risk_adjusted_score": null,
+        "history_days": 234,
         "last_price": 114.51,
         "last_date": "14/10/2026"
       },

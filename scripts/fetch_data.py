@@ -21,7 +21,16 @@ USER_AGENT = "Mozilla/5.0 (compatible; stockbroker-fetch/1.0)"
 BASE = "https://www.bizportal.co.il"
 
 TRADING_DAYS_PER_YEAR = 252
-HORIZONS = {"1m": 21, "3m": 63, "6m": 126, "12m": 252}
+
+# Short horizons: reported as simple cumulative return, for context only.
+SHORT_HORIZONS = {"1m": 21, "3m": 63, "6m": 126}
+
+# Long horizons: reported as annualized (CAGR) return + annualized volatility,
+# and blended into the risk-adjusted score. Longer windows are weighted more
+# heavily since they're less noisy, but 1y keeps the score responsive to
+# recent trend. A horizon only counts if the fund has a full window of history.
+LONG_HORIZONS = {"1y": 252, "3y": 756, "5y": 1260}
+LONG_HORIZON_WEIGHTS = {"1y": 0.25, "3y": 0.35, "5y": 0.40}
 
 # Minimum weight floor per fund so the recommendation never drops a fund to 0%,
 # keeping the user's existing diversification across all 7 baskets.
@@ -68,6 +77,7 @@ def fetch_fund_series(opener, fund_id):
 
 
 def trailing_return(series, days):
+    """Simple cumulative return over the trailing `days`, or None if not enough history."""
     if len(series) <= days:
         return None
     start = series[-days - 1]["close"]
@@ -77,14 +87,28 @@ def trailing_return(series, days):
     return (end / start) - 1.0
 
 
-def annualized_volatility(series, days):
-    window = series[-days - 1 :] if len(series) > days else series
-    if len(window) < 3:
+def annualized_return(series, days):
+    """CAGR over the trailing `days`, or None if not enough history."""
+    cum = trailing_return(series, days)
+    if cum is None:
         return None
-    daily_returns = []
-    for prev, cur in zip(window, window[1:]):
-        if prev["close"] > 0:
-            daily_returns.append(math.log(cur["close"] / prev["close"]))
+    return (1.0 + cum) ** (TRADING_DAYS_PER_YEAR / days) - 1.0
+
+
+def annualized_volatility(series, days):
+    """Annualized stdev of daily log returns over the trailing `days`.
+
+    Requires a *full* window (not a partial one) so volatility is comparable
+    across funds with different amounts of history.
+    """
+    if len(series) <= days:
+        return None
+    window = series[-days - 1 :]
+    daily_returns = [
+        math.log(cur["close"] / prev["close"])
+        for prev, cur in zip(window, window[1:])
+        if prev["close"] > 0
+    ]
     if len(daily_returns) < 2:
         return None
     return statistics.pstdev(daily_returns) * math.sqrt(TRADING_DAYS_PER_YEAR)
@@ -92,14 +116,27 @@ def annualized_volatility(series, days):
 
 def compute_metrics(series):
     metrics = {}
-    for label, days in HORIZONS.items():
+    for label, days in SHORT_HORIZONS.items():
         metrics[f"return_{label}"] = trailing_return(series, days)
-    metrics["volatility_12m"] = annualized_volatility(series, HORIZONS["12m"])
-    ret_12m = metrics["return_12m"]
-    vol = metrics["volatility_12m"]
-    metrics["risk_adjusted_score"] = (
-        ret_12m / vol if ret_12m is not None and vol else None
-    )
+
+    horizon_scores = {}
+    for label, days in LONG_HORIZONS.items():
+        ret = annualized_return(series, days)
+        vol = annualized_volatility(series, days)
+        metrics[f"return_{label}"] = ret
+        metrics[f"volatility_{label}"] = vol
+        if ret is not None and vol:
+            horizon_scores[label] = ret / vol
+
+    if horizon_scores:
+        weight_sum = sum(LONG_HORIZON_WEIGHTS[l] for l in horizon_scores)
+        metrics["risk_adjusted_score"] = sum(
+            horizon_scores[l] * LONG_HORIZON_WEIGHTS[l] for l in horizon_scores
+        ) / weight_sum
+    else:
+        metrics["risk_adjusted_score"] = None
+
+    metrics["history_days"] = len(series)
     metrics["last_price"] = series[-1]["close"]
     metrics["last_date"] = series[-1]["date"]
     return metrics
