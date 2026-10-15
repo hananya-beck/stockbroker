@@ -1,0 +1,55 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { pickDispatchedRun, describeRunState, describeApiError } from '../../src/lib/refresh.js';
+
+const clicked = new Date('2026-10-16T10:00:00Z');
+
+/** @param {Partial<import('../../src/lib/refresh.js').WorkflowRun>} over */
+function run(over) {
+  return { id: 1, event: 'workflow_dispatch', status: 'queued', conclusion: null, created_at: '2026-10-16T10:00:05Z', ...over };
+}
+
+test('pickDispatchedRun returns null when no runs exist', () => {
+  assert.equal(pickDispatchedRun([], clicked), null);
+});
+
+test('pickDispatchedRun ignores runs created before the click', () => {
+  assert.equal(pickDispatchedRun([run({ created_at: '2026-10-16T09:00:00Z' })], clicked), null);
+});
+
+test('pickDispatchedRun ignores scheduled runs', () => {
+  assert.equal(pickDispatchedRun([run({ event: 'schedule' })], clicked), null);
+});
+
+test('pickDispatchedRun tolerates small clock skew', () => {
+  const r = run({ created_at: '2026-10-16T09:59:50Z' });
+  assert.equal(pickDispatchedRun([r], clicked), r);
+});
+
+test('pickDispatchedRun picks the earliest run after the click', () => {
+  const later = run({ id: 2, created_at: '2026-10-16T10:01:00Z' });
+  const first = run({ id: 1, created_at: '2026-10-16T10:00:03Z' });
+  assert.equal(pickDispatchedRun([later, first], clicked)?.id, 1);
+});
+
+test('describeRunState: no run yet is dispatching', () => {
+  assert.deepEqual(describeRunState(null), { phase: 'running', message: 'מפעיל…' });
+});
+
+test('describeRunState: queued and in_progress are computing', () => {
+  assert.equal(describeRunState(run({ status: 'queued' })).message, 'מחשב…');
+  assert.equal(describeRunState(run({ status: 'in_progress' })).phase, 'running');
+});
+
+test('describeRunState: completed success loads data', () => {
+  assert.deepEqual(describeRunState(run({ status: 'completed', conclusion: 'success' })), { phase: 'success', message: 'טוען נתונים…' });
+});
+
+test('describeRunState: completed failure reports the conclusion', () => {
+  assert.deepEqual(describeRunState(run({ status: 'completed', conclusion: 'failure' })), { phase: 'failed', message: 'הריצה נכשלה (failure)' });
+});
+
+test('describeApiError explains auth failures', () => {
+  assert.match(describeApiError(401), /401/);
+  assert.match(describeApiError(500), /500/);
+});
