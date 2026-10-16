@@ -2,7 +2,7 @@
 
 A small static dashboard for a monthly קרן השתלמות (capital investment fund) deposit:
 tracks 7 TASE-listed index funds/ETFs, ranks them by a risk-adjusted score blended
-across 1/3/5-year windows (annualized return ÷ annualized volatility, weighted
+across 1/3/5-year windows (annualized return minus a risk-free rate, ÷ annualized volatility, weighted
 25%/35%/40% toward the longer, less noisy windows), and suggests how to split that
 month's deposit across them.
 
