@@ -5,6 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
 from fetch_data import (  # noqa: E402
+    allocate_weights,
     annualized_return,
     annualized_volatility,
     compute_metrics,
@@ -59,3 +60,46 @@ def test_compute_metrics_no_history_gives_none_score_and_blend():
     metrics = compute_metrics(series)
     assert metrics["risk_adjusted_score"] is None
     assert metrics["volatility_blended"] is None
+
+
+def test_annualized_volatility_skips_zero_price_without_crashing():
+    series = make_series([100.0] * 10 + [0.0] + [100.0] * 10)
+    assert annualized_volatility(series, 20) == 0.0
+
+
+def test_score_subtracts_risk_free_rate():
+    prices = [100.0]
+    for i in range(1, 253):
+        prices.append(prices[-1] * (1.002 if i % 2 == 0 else 0.999))
+    series = make_series(prices)
+    m0 = compute_metrics(series, risk_free_rate=0.0)
+    m4 = compute_metrics(series, risk_free_rate=0.04)
+    expected = m0["risk_adjusted_score"] - 0.04 / m0["volatility_1y"]
+    assert math.isclose(m4["risk_adjusted_score"], expected)
+
+
+def test_young_fund_scored_on_partial_history():
+    prices = [100.0]
+    for i in range(1, 200):
+        prices.append(prices[-1] * (1.002 if i % 2 == 0 else 0.999))
+    metrics = compute_metrics(make_series(prices))
+    assert metrics["score_basis"] == "partial_history"
+    assert metrics["risk_adjusted_score"] is not None
+
+
+def _fund(score):
+    return {"metrics": {"risk_adjusted_score": score}}
+
+
+def test_worst_fund_gets_more_than_floor():
+    funds = [_fund(1.0), _fund(0.5), _fund(-0.5)]
+    allocate_weights(funds)
+    assert math.isclose(sum(f["suggested_weight"] for f in funds), 1.0)
+    assert funds[2]["suggested_weight"] > 0.03 + 0.01
+
+
+def test_floor_capped_for_many_funds():
+    funds = [_fund(None) for _ in range(40)] + [_fund(1.0)]
+    allocate_weights(funds)
+    assert all(f["suggested_weight"] >= 0 for f in funds)
+    assert math.isclose(sum(f["suggested_weight"] for f in funds), 1.0, abs_tol=1e-6)
