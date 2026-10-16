@@ -12,7 +12,7 @@
 ## Conventions
 - UI text is Hebrew and the page is RTL. Match the existing wording ("רענן נתונים", "עודכן לאחרונה").
 - Colors, spacing and fonts come from `src/styles/tokens.css` custom properties. Never hard-code a color.
-- Logic worth testing goes in `src/lib/` as a pure function with JSDoc types, with a test in `tests/js/`.
+- Logic worth testing goes in `src/lib/` as a pure function (its own `CLAUDE.md` has the details).
 - Show every failure to the user (status text next to the control, plus an alert for auth errors like a 401). Never fail silently.
 - Exercise write-ups go in `homework/exercise-N.md`, and development prompts go in `prompts/`.
 
