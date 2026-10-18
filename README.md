@@ -18,6 +18,48 @@ Live site: https://hananya-beck.github.io/stockbroker/
 - `index.html` is a static page that reads `data/funds.json` and lets you type in a
   deposit amount to see the suggested ₪ split.
 
+## Architecture
+
+Generated from the codebase-memory graph (`get_architecture`: entry points, layers, call boundaries).
+
+```mermaid
+flowchart LR
+  subgraph bot["GitHub Actions (daily 05:00 UTC + workflow_dispatch)"]
+    wf[".github/workflows/update-data.yml"]
+  end
+  subgraph py["scripts/fetch_data.py"]
+    main["main()"] --> cm["compute_metrics()"]
+    cm --> tr["trailing_return()"]
+    cm --> ar["annualized_return()"]
+    cm --> av["annualized_volatility()"]
+    main --> aw["allocate_weights()"]
+  end
+  biz[("bizportal.co.il")]
+  cfg["data/funds_config.json"]
+  data[("data/funds.json")]
+  wf --> main
+  cfg --> main
+  biz --> main
+  main --> data
+
+  subgraph page["index.html (DOM + fetch)"]
+    showData["showData() / load()"] --> render["render()"]
+    refresh["refresh button"]
+  end
+  subgraph lib["src/lib (pure, unit-tested)"]
+    fmt["formatting.js<br/>buildFundRowViewModel, formatScore,<br/>computeAllocationAmount, summarizeAllocation"]
+    rf["refresh.js<br/>pickDispatchedRun, describeRunState,<br/>describeApiError, isPastDeadline"]
+  end
+  data --> showData
+  render --> fmt
+  refresh --> rf
+  refresh -->|"workflow_dispatch"| gh[("api.github.com")]
+  gh --> wf
+
+  tests["tests/test_fetch_data.py"] -.-> cm
+  tests -.-> aw
+```
+
 ## The 7 funds
 
 | Security ID | Name |
