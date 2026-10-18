@@ -17,9 +17,22 @@
  */
 
 /**
- * Pick the workflow_dispatch run that started after the click. The dispatch
- * endpoint returns no run id, so we match by creation time; `skewMs` absorbs
- * clock drift between the browser and GitHub.
+ * Read the run id from a workflow dispatch response body. Since REST API
+ * version 2026-03-10 the dispatch endpoint answers 200 with
+ * `{ workflow_run_id, run_url, html_url }`; older versions answer 204 with no body.
+ * @param {unknown} body - Parsed JSON body, or null when there was none.
+ * @returns {number | null} The run id, or null if the body doesn't carry a valid one.
+ */
+export function dispatchedRunId(body) {
+  if (!body || typeof body !== 'object') return null;
+  const id = /** @type {{ workflow_run_id?: unknown }} */ (body).workflow_run_id;
+  return Number.isSafeInteger(id) && /** @type {number} */ (id) > 0 ? /** @type {number} */ (id) : null;
+}
+
+/**
+ * Pick the workflow_dispatch run that started after the click. Fallback for
+ * when the dispatch response carries no run id (see `dispatchedRunId`): match by
+ * creation time, with `skewMs` absorbing clock drift between browser and GitHub.
  * @param {WorkflowRun[]} runs
  * @param {Date} dispatchedAt - Browser time just before the dispatch request.
  * @param {number} [skewMs]

@@ -1,6 +1,23 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pickDispatchedRun, describeRunState, describeApiError } from '../../src/lib/refresh.js';
+import { dispatchedRunId, pickDispatchedRun, describeRunState, describeApiError } from '../../src/lib/refresh.js';
+
+test('dispatchedRunId reads workflow_run_id from a 2026-03-10 dispatch response', () => {
+  const body = { workflow_run_id: 18234567890, run_url: 'https://api.github.com/x', html_url: 'https://github.com/x' };
+  assert.equal(dispatchedRunId(body), 18234567890);
+});
+
+test('dispatchedRunId returns null for an empty (204) response', () => {
+  assert.equal(dispatchedRunId(null), null);
+  assert.equal(dispatchedRunId(undefined), null);
+  assert.equal(dispatchedRunId({}), null);
+});
+
+test('dispatchedRunId rejects ids that are not positive integers', () => {
+  for (const workflow_run_id of ['123', 0, -5, 1.5, NaN, null]) {
+    assert.equal(dispatchedRunId({ workflow_run_id }), null);
+  }
+});
 
 const clicked = new Date('2026-10-16T10:00:00Z');
 
