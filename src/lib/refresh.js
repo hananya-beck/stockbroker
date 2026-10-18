@@ -76,3 +76,26 @@ export function describeApiError(status) {
     default: return `שגיאת GitHub (${status})`;
   }
 }
+
+/**
+ * Query string for the fallback run-list poll: workflow_dispatch runs on main
+ * created since the click, minus `skewMs` for clock drift (matches `pickDispatchedRun`).
+ * @param {Date} dispatchedAt - Browser time just before the dispatch request.
+ * @param {number} [skewMs]
+ * @returns {string}
+ */
+export function dispatchedRunsQuery(dispatchedAt, skewMs = 30_000) {
+  const created = `>=${new Date(dispatchedAt.getTime() - skewMs).toISOString()}`;
+  return `event=workflow_dispatch&branch=main&created=${encodeURIComponent(created)}&per_page=10`;
+}
+
+/**
+ * Whether the poll loop has run out of time.
+ * @param {number} startedAtMs
+ * @param {number} nowMs
+ * @param {number} timeoutMs
+ * @returns {boolean}
+ */
+export function isPastDeadline(startedAtMs, nowMs, timeoutMs) {
+  return nowMs - startedAtMs > timeoutMs;
+}

@@ -150,7 +150,7 @@
 
 <script type="module">
 import { buildFundRowViewModel, formatRelativeTime, summarizeAllocation } from './src/lib/formatting.js';
-import { describeApiError, describeRunState, dispatchedRunId, pickDispatchedRun } from './src/lib/refresh.js';
+import { describeApiError, describeRunState, dispatchedRunId, dispatchedRunsQuery, isPastDeadline, pickDispatchedRun } from './src/lib/refresh.js';
 
 /** @param {import('./src/lib/formatting.js').FormattedValue} v */
 function cell(v) {
@@ -171,6 +171,11 @@ function showData(newData) {
   render();
 }
 
+/** @param {string} s */
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
 function render() {
   if (!data) return;
   const amount = parseFloat(amountInput.value) || 0;
@@ -180,10 +185,10 @@ function render() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>
-        <div class="fund-name">${row.nameEn}</div>
-        <div class="fund-sub">${row.nameHe}</div>
+        <div class="fund-name">${escapeHtml(row.nameEn)}</div>
+        <div class="fund-sub">${escapeHtml(row.nameHe)}</div>
       </td>
-      <td>${row.id}</td>
+      <td>${escapeHtml(String(row.id))}</td>
       <td>${cell(row.return1m)}</td>
       <td>${cell(row.return3m)}</td>
       <td>${cell(row.return1y)}</td>
@@ -211,12 +216,19 @@ amountInput.addEventListener('input', render);
 
 async function load() {
   const res = await fetch('data/funds.json', { cache: 'no-store' });
+  if (!res.ok) throw new Error(`הקובץ לא נטען (${res.status})`);
   showData(await res.json());
 }
 
 load().catch(err => {
-  document.getElementById('fundsBody').innerHTML =
-    `<tr><td colspan="14">שגיאה בטעינת הנתונים: ${err.message}</td></tr>`;
+  const message = `שגיאה בטעינת הנתונים: ${err.message}`;
+  const td = document.createElement('td');
+  td.colSpan = 14;
+  td.textContent = message;
+  const tr = document.createElement('tr');
+  tr.appendChild(td);
+  tbody.replaceChildren(tr);
+  setStatus(message, { error: true });
 });
 
 // ---- On-demand refresh: dispatch the workflow, wait for it, reload data ----
@@ -279,7 +291,10 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function refresh() {
   if (!token) token = await askToken();
-  if (!token) return;
+  if (!token) {
+    setStatus('הרענון בוטל: לא הוזן טוקן', { error: true });
+    return;
+  }
 
   refreshBtn.disabled = true;
   try {
@@ -294,17 +309,16 @@ async function refresh() {
     });
     const runId = dispatchRes.status === 200 ? dispatchedRunId(await dispatchRes.json()) : null;
 
-    const deadline = Date.now() + TIMEOUT_MS;
+    const startedAt = Date.now();
     let state;
     for (;;) {
-      if (Date.now() > deadline) throw new Error('הריצה לא הסתיימה בזמן');
+      if (isPastDeadline(startedAt, Date.now(), TIMEOUT_MS)) throw new Error('הריצה לא הסתיימה בזמן');
       await sleep(POLL_MS);
       if (runId) {
         const res = await gh(`/actions/runs/${runId}`);
         state = describeRunState(await res.json());
       } else {
-        const created = `>=${new Date(dispatchedAt.getTime() - 30_000).toISOString()}`;
-        const res = await gh(`/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&branch=main&created=${encodeURIComponent(created)}&per_page=10`);
+        const res = await gh(`/actions/workflows/${WORKFLOW}/runs?${dispatchedRunsQuery(dispatchedAt)}`);
         const { workflow_runs } = await res.json();
         state = describeRunState(pickDispatchedRun(workflow_runs, dispatchedAt));
       }

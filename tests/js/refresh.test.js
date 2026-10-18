@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dispatchedRunId, pickDispatchedRun, describeRunState, describeApiError } from '../../src/lib/refresh.js';
+import { URLSearchParams } from 'node:url';
+import { dispatchedRunId, pickDispatchedRun, describeRunState, describeApiError, dispatchedRunsQuery, isPastDeadline } from '../../src/lib/refresh.js';
 
 test('dispatchedRunId reads workflow_run_id from a 2026-03-10 dispatch response', () => {
   const body = { workflow_run_id: 18234567890, run_url: 'https://api.github.com/x', html_url: 'https://github.com/x' };
@@ -69,4 +70,17 @@ test('describeRunState: completed failure reports the conclusion', () => {
 test('describeApiError explains auth failures', () => {
   assert.match(describeApiError(401), /401/);
   assert.match(describeApiError(500), /500/);
+});
+
+test('dispatchedRunsQuery filters to dispatch runs on main since the click minus skew', () => {
+  const q = new URLSearchParams(dispatchedRunsQuery(new Date('2026-10-18T05:00:30Z')));
+  assert.equal(q.get('event'), 'workflow_dispatch');
+  assert.equal(q.get('branch'), 'main');
+  assert.equal(q.get('created'), '>=2026-10-18T05:00:00.000Z');
+  assert.equal(q.get('per_page'), '10');
+});
+
+test('isPastDeadline is true only once the timeout has elapsed', () => {
+  assert.equal(isPastDeadline(1000, 1000 + 500, 500), false);
+  assert.equal(isPastDeadline(1000, 1000 + 501, 500), true);
 });
