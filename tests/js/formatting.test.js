@@ -97,6 +97,14 @@ test('formatRelativeTime returns "" for an unparseable date', () => {
   assert.equal(formatRelativeTime('not a date', NOW), '');
 });
 
+test('formatRelativeTime supports English', () => {
+  assert.equal(formatRelativeTime(ago(30), NOW, 'en'), 'just now');
+  assert.equal(formatRelativeTime(ago(5 * 60), NOW, 'en'), '5 minutes ago');
+  assert.equal(formatRelativeTime(ago(3 * 3600), NOW, 'en'), '3 hours ago');
+  assert.equal(formatRelativeTime(ago(4 * 86400), NOW, 'en'), '4 days ago');
+  assert.equal(formatRelativeTime(ago(86400), NOW, 'en'), 'yesterday');
+});
+
 /**
  * @param {number} weight
  * @param {number | null} score

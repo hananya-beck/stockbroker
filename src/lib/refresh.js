@@ -50,31 +50,57 @@ export function pickDispatchedRun(runs, dispatchedAt, skewMs = 30_000) {
   return best;
 }
 
+/** @type {Record<import('./i18n.js').Lang, { starting: string, computing: string, loading: string, failed: (c: string) => string }>} */
+const RUN_STATE_TEXT = {
+  he: { starting: 'מפעיל…', computing: 'מחשב…', loading: 'טוען נתונים…', failed: (c) => `הריצה נכשלה (${c})` },
+  en: { starting: 'Starting…', computing: 'Computing…', loading: 'Loading data…', failed: (c) => `Run failed (${c})` },
+};
+
 /**
  * Map a workflow run (or its absence) to a UI state.
  * @param {WorkflowRun | null} run - null while the run hasn't appeared yet.
+ * @param {import('./i18n.js').Lang} [lang]
  * @returns {RefreshState}
  */
-export function describeRunState(run) {
-  if (!run) return { phase: 'running', message: 'מפעיל…' };
-  if (run.status !== 'completed') return { phase: 'running', message: 'מחשב…' };
-  if (run.conclusion === 'success') return { phase: 'success', message: 'טוען נתונים…' };
-  return { phase: 'failed', message: `הריצה נכשלה (${run.conclusion ?? 'unknown'})` };
+export function describeRunState(run, lang = 'he') {
+  const text = RUN_STATE_TEXT[lang] ?? RUN_STATE_TEXT.he;
+  if (!run) return { phase: 'running', message: text.starting };
+  if (run.status !== 'completed') return { phase: 'running', message: text.computing };
+  if (run.conclusion === 'success') return { phase: 'success', message: text.loading };
+  return { phase: 'failed', message: text.failed(run.conclusion ?? 'unknown') };
 }
 
+/** @type {Record<import('./i18n.js').Lang, Record<number, string>>} */
+const API_ERROR_TEXT = {
+  he: {
+    401: 'הטוקן לא תקין או שפג תוקפו (401)',
+    403: 'לטוקן אין הרשאה מתאימה (403)',
+    404: 'הריפו או ה-workflow לא נמצאו, או שלטוקן אין גישה (404)',
+    422: 'GitHub דחה את הבקשה (422)',
+  },
+  en: {
+    401: 'Token is invalid or expired (401)',
+    403: 'Token lacks the required permission (403)',
+    404: 'Repo or workflow not found, or the token lacks access (404)',
+    422: 'GitHub rejected the request (422)',
+  },
+};
+
+/** @type {Record<import('./i18n.js').Lang, (status: number) => string>} */
+const DEFAULT_API_ERROR = {
+  he: (status) => `שגיאת GitHub (${status})`,
+  en: (status) => `GitHub error (${status})`,
+};
+
 /**
- * Hebrew explanation for a failed GitHub API response.
+ * Explanation for a failed GitHub API response.
  * @param {number} status - HTTP status code.
+ * @param {import('./i18n.js').Lang} [lang]
  * @returns {string}
  */
-export function describeApiError(status) {
-  switch (status) {
-    case 401: return 'הטוקן לא תקין או שפג תוקפו (401)';
-    case 403: return 'לטוקן אין הרשאה מתאימה (403)';
-    case 404: return 'הריפו או ה-workflow לא נמצאו, או שלטוקן אין גישה (404)';
-    case 422: return 'GitHub דחה את הבקשה (422)';
-    default: return `שגיאת GitHub (${status})`;
-  }
+export function describeApiError(status, lang = 'he') {
+  const text = API_ERROR_TEXT[lang] ?? API_ERROR_TEXT.he;
+  return text[status] ?? (DEFAULT_API_ERROR[lang] ?? DEFAULT_API_ERROR.he)(status);
 }
 
 /**

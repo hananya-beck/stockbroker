@@ -72,6 +72,29 @@ test('describeApiError explains auth failures', () => {
   assert.match(describeApiError(500), /500/);
 });
 
+test('describeRunState defaults to Hebrew when lang is omitted', () => {
+  assert.equal(describeRunState(null).message, 'מפעיל…');
+});
+
+test('describeRunState supports English', () => {
+  assert.deepEqual(describeRunState(null, 'en'), { phase: 'running', message: 'Starting…' });
+  assert.equal(describeRunState(run({ status: 'queued' }), 'en').message, 'Computing…');
+  assert.deepEqual(
+    describeRunState(run({ status: 'completed', conclusion: 'success' }), 'en'),
+    { phase: 'success', message: 'Loading data…' },
+  );
+  assert.deepEqual(
+    describeRunState(run({ status: 'completed', conclusion: 'failure' }), 'en'),
+    { phase: 'failed', message: 'Run failed (failure)' },
+  );
+});
+
+test('describeApiError supports English', () => {
+  assert.match(describeApiError(401, 'en'), /401/);
+  assert.match(describeApiError(401, 'en'), /[Tt]oken/);
+  assert.match(describeApiError(500, 'en'), /500/);
+});
+
 test('dispatchedRunsQuery filters to dispatch runs on main since the click minus skew', () => {
   const q = new URLSearchParams(dispatchedRunsQuery(new Date('2026-10-18T05:00:30Z')));
   assert.equal(q.get('event'), 'workflow_dispatch');

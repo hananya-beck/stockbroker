@@ -6,6 +6,7 @@ export default [
       sourceType: 'module',
       globals: {
         console: 'readonly',
+        URLSearchParams: 'readonly',
       },
     },
     rules: {

@@ -149,29 +149,32 @@ const RELATIVE_UNITS = /** @type {const} */ ([
   ['minute', 60],
 ]);
 
+const JUST_NOW = { he: 'ממש עכשיו', en: 'just now' };
+
 /**
- * Hebrew relative time for a past timestamp, e.g. "לפני 3 ימים".
+ * Relative time for a past timestamp, e.g. "לפני 3 ימים" / "3 days ago".
  * `now` is passed in so the function stays pure and testable.
  * @param {string} isoDate - ISO 8601 timestamp, e.g. data.generated_at.
  * @param {Date} now
+ * @param {import('./i18n.js').Lang} [lang]
  * @returns {string} Relative text, or "" when isoDate is unparseable.
  */
-export function formatRelativeTime(isoDate, now) {
+export function formatRelativeTime(isoDate, now, lang = 'he') {
   const then = new Date(isoDate).getTime();
   if (Number.isNaN(then)) {
     return '';
   }
   const seconds = Math.round((now.getTime() - then) / 1000);
   if (seconds < 60) {
-    return 'ממש עכשיו';
+    return JUST_NOW[lang] ?? JUST_NOW.he;
   }
-  const rtf = new Intl.RelativeTimeFormat('he', { numeric: 'auto' });
+  const rtf = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
   for (const [unit, size] of RELATIVE_UNITS) {
     if (seconds >= size) {
       return rtf.format(-Math.floor(seconds / size), unit);
     }
   }
-  return 'ממש עכשיו';
+  return JUST_NOW[lang] ?? JUST_NOW.he;
 }
 
 /**
