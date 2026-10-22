@@ -1,4 +1,4 @@
-# stockbroker
+# stockbroker - lesson 1 exercise
 
 A small static dashboard for a monthly קרן השתלמות (capital investment fund) deposit:
 tracks 7 TASE-listed index funds/ETFs, ranks them by a risk-adjusted score blended
@@ -7,6 +7,11 @@ across 1/3/5-year windows (annualized return minus a risk-free rate, ÷ annualiz
 month's deposit across them.
 
 Live site: https://hananya-beck.github.io/stockbroker/
+
+## lesson 2 exercise
+Note: For the purpose of the lesson 2 exercise i created a separate repo (based on this repo) with a separate site:
+https://github.com/hananya-beck/stockbrokerV2
+https://hananya-beck.github.io/stockbrokerV2/
 
 ## How it works
 
