@@ -10,7 +10,7 @@ Live site: https://hananya-beck.github.io/stockbroker/
 
 ## Lesson 2 exercise
 Note: For the purpose of the lesson 2 exercise i created a separate repo (based on this repo) with a separate site:
-https://github.com/hananya-beck/stockbrokerV2
+https://github.com/hananya-beck/stockbrokerV2             
 https://hananya-beck.github.io/stockbrokerV2/
 
 ## How it works
